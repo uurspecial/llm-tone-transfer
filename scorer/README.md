@@ -12,7 +12,7 @@
   - 讀取資料集、建立 few-shot prompt、對測試集執行評分。
   - 支援參數：`-v/--version`、`-m/--model`、`-d/--dataset`、`--csv`。
 - `scorer_prompt.py`
-  - 定義語氣尺度與 prompt 組成。
+  - 等級定義與 prompt 組成。
   - 包含 `V1_SCALE_DEFINITION`、`V2_SCALE_DEFINITION`、`V3_SCALE_DEFINITION`、`V4_SCALE_DEFINITION`。
   - 目前固定使用 `V1_SCALE_DEFINITION`。
 - `model_clients.py`
@@ -20,10 +20,6 @@
   - 支援 OpenAI、Gemini、Breeze、Llama、Groq 等模型。
 - `requirements.txt`
   - Python 套件需求列表。
-- `run_all.sh`
-  - 批量執行評分腳本的輔助 shell script。
-- `test.py`
-  - 測試或驗證用腳本。
 
 ## 使用方法
 
@@ -75,7 +71,7 @@ python scorer.py --csv /path/to/file.csv
 
 本 README 與現行實驗流程均使用 `V1_SCALE_DEFINITION`：
 
-- 代表目前專案固定使用版本 1 的語氣定義。
+- 代表目前專案固定使用版本 1 的等級定義。
 - `scorer.py` 預設版本為 1，對應 `V1_SCALE_DEFINITION`。
 - 其他版本仍可在程式中選擇，但本說明不鼓勵變更以維持實驗一致性。
 
