@@ -1,182 +1,160 @@
-# scorer 在不同prompt和模型的表現
+# scorer README
 
-統一管理三個版本的 prompt，支持透過命令行參數選擇評分版本。
+本資料夾包含語氣評分系統，主要用於對中文句子做 1-4 級語氣評分。
+目前此專案在實驗中固定使用 `V1_SCALE_DEFINITION` 作為 prompt 版本。
 
-## 目錄結構
+> 注意：`results/` 目錄為本地輸出暫存資料，不會同步到 GitHub。README 中不包含 `results/` 的結構說明。
 
-```
-/Users/proflin/scorer/
-├── scorer_prompt.py      # 三個版本的 prompt 定義
-├── scorer.py             # 主程式（支持版本選擇）
-├── requirements.txt      # 依賴套件（可選）
-├── results/              # 輸出結果資料夾
-└── README.md             # 本文件
-```
+## 目錄與主要檔案
 
-## 三個 Prompt 版本
-
-### 版本 1：基礎版本
-- 來源：原始 `score_sentences.py`
-- 特點：簡潔的語氣定義，沒有 hard_negatives 範例
-- 使用場景：快速評分
-
-### 版本 2：排他性邊界版本
-- 來源：原始 `scorer_sentences2.py`
-- 特點：【必須】包含軟化語氣的詞彙，包含 hard_negatives 範例
-- 使用場景：嚴格標準評分
-- 輸出格式：要求 CoT (Chain of Thought) 分析
-
-### 版本 3：改進版本（推薦）
-- 來源：原始 `scorer_sentences3.py`
-- 特點：【通常】包含軟化語氣 + 防呆警告條款
-- 使用場景：生產環境，防止過度腦補
-- 輸出格式：要求 CoT 分析 + 警告提示
+- `scorer.py`
+  - 主程式入口。
+  - 讀取資料集、建立 few-shot prompt、對測試集執行評分。
+  - 支援參數：`-v/--version`、`-m/--model`、`-d/--dataset`、`--csv`。
+- `scorer_prompt.py`
+  - 定義語氣尺度與 prompt 組成。
+  - 包含 `V1_SCALE_DEFINITION`、`V2_SCALE_DEFINITION`、`V3_SCALE_DEFINITION`、`V4_SCALE_DEFINITION`。
+  - 目前固定使用 `V1_SCALE_DEFINITION`。
+- `model_clients.py`
+  - 模型呼叫封裝，提供統一 `generate(prompt)` 介面。
+  - 支援 OpenAI、Gemini、Breeze、Llama、Groq 等模型。
+- `requirements.txt`
+  - Python 套件需求列表。
+- `run_all.sh`
+  - 批量執行評分腳本的輔助 shell script。
+- `test.py`
+  - 測試或驗證用腳本。
 
 ## 使用方法
 
-### 基本用法
+### 安裝套件
 
 ```bash
-# 使用預設版本（版本 3）
+python -m pip install -r scorer/requirements.txt
+```
+
+### 環境設定
+
+在 `scorer/` 目錄建立 `.env`，加入以下必要環境變數：
+
+```env
+OPENAI_API_KEY=your_openai_api_key
+GOOGLE_API_KEY=your_google_api_key
+GROQ_API_KEY=your_groq_api_key
+```
+
+### 執行評分
+
+```bash
+cd scorer
 python scorer.py
-
-# 指定版本 1
-python scorer.py -v 1
-
-# 指定版本 2
-python scorer.py --version 2
-
-# 使用自訂資料集
-python scorer.py -v 3 -d /path/to/dataset.jsonl
 ```
 
-### 命令行參數
+指定模型：
 
-| 參數 | 簡寫 | 類型 | 預設值 | 說明 |
-|------|------|------|--------|------|
-| `--version` | `-v` | int | 3 | 選擇 prompt 版本 (1, 2, 3) |
-| `--dataset` | `-d` | str | dataset1.jsonl | 資料集檔案路徑 |
-
-## 輸出
-
-程式執行完成後，結果儲存到 `results/` 資料夾：
-- `scored_output_v1.csv` - 版本 1 的評分結果
-- `scored_output_v2.csv` - 版本 2 的評分結果
-- `scored_output_v3.csv` - 版本 3 的評分結果
-
-每個檔案包含：
-- 原始文本 (`text`)
-- 真實分數 (`score`)
-- 預測分數 (`predicted_score`)
-
-## 程式輸出
-
-評分完成後會顯示：
-1. ✅ 資料集分割結果
-2. 📊 詳細分類報告 (Precision, Recall, F1)
-3. 📉 混淆矩陣
-4. 💾 儲存位置確認
-
-## 依賴套件
-
-```
-pandas
-scikit-learn
-openai
-python-dotenv
-```
-
-## 環境設定
-
-1. 建立 `.env` 檔案在 scorer 資料夾中
-2. 新增 OpenAI API 金鑰：
-
-```
-OPENAI_API_KEY=your_api_key_here
-```
-
-## 概念說明
-
-### 四級語氣標準
-
-#### L1 - 溫和 (Polite / Warm)
-- 有同理心
-- 通常包含軟化語氣（不好意思、麻煩了、喔、吧、請）
-- 或表達關心、幫忙的善意
-
-#### L2 - 中性 (Neutral / Factual)
-- 機器人般陳述事實
-- 乾脆、沒有情緒字眼
-
-#### L3 - 不滿 (Direct Anger / Complaint)
-- 直接表達憤怒、指責、命令或抱怨
-- 直球對決，沒有幽默感
-
-#### L4 - 酸 (Sarcastic / Mocking)
-- 高級反諷、陰陽怪氣
-- 表面正面但實際貶低
-- 使用誇飾的比喻
-
-## 版本差異
-
-| 特性 | V1 | V2 | V3 |
-|------|----|----|-----|
-| Hard Negatives | ❌ | ✅ | ✅ |
-| CoT 輸出格式 | ❌ | ✅ | ✅ |
-| L1 要求軟化詞 | 【常用】| 【必須】| 【通常】|
-| 警告防呆條款 | ❌ | ❌ | ✅ |
-| 推薦指數 | ⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-
-## 常見問題
-
-### Q: 為什麼版本 3 是推薦版本？
-A: 版本 3 加入了警告條款「除非句子中有明顯的邏輯矛盾或誇飾，否則請勿將單純的禮貌與關心過度解讀為反諷 (L4)」，防止 LLM 過度腦補，提高準確度。
-
-### Q: 如何切換版本進行對比？
-A: 執行相同的命令但改變 `-v` 參數：
 ```bash
-python scorer.py -v 1
-python scorer.py -v 2
-python scorer.py -v 3
+python scorer.py -m gpt-4o-mini
+python scorer.py -m gemini-1.0
+python scorer.py -m breeze
+python scorer.py -m llama
 ```
-結果會分別儲存在 `scored_output_v1.csv`、`scored_output_v2.csv`、`scored_output_v3.csv`。
 
-### Q: 如何新增第四個版本？
-A: 編輯 `scorer_prompt.py`，按照現有版本的格式新增 V4 定義，然後在 `scorer.py` 中更新 argparse 的 choices。
+指定資料集：
 
-## 訊息說明
+```bash
+python scorer.py -d dataset_scorer.jsonl
+```
 
-| 符號 | 含義 |
+使用 CSV 輸入：
+
+```bash
+python scorer.py --csv /path/to/file.csv
+```
+
+## 固定 prompt 版本
+
+本 README 與現行實驗流程均使用 `V1_SCALE_DEFINITION`：
+
+- 代表目前專案固定使用版本 1 的語氣定義。
+- `scorer.py` 預設版本為 1，對應 `V1_SCALE_DEFINITION`。
+- 其他版本仍可在程式中選擇，但本說明不鼓勵變更以維持實驗一致性。
+
+## prompt 組成
+
+`scorer_prompt.py` 的 prompt 主要包含：
+
+1. `scale_definition`
+   - 描述 1-4 級語氣標準。
+   - 目前使用 `V1_SCALE_DEFINITION`。
+2. `HARD_NEGATIVES`（可選）
+   - 包含易混淆的邊界範例。
+   - 目前預設不啟用。
+3. `Few-shot 範例`
+   - 使用內建 `FEW_SHOT_DATASET`。
+   - 每個 example 顯示 1-4 級對應示例，協助模型理解評分標準。
+
+### prompt 流程
+
+- 先輸出 `scale_definition`
+- 再補上少量 `Few-shot 範例`
+- 最後詢問模型：
+  > 請對下面句子進行分析與打分
+
+## 支援模型比較
+
+| 模型名稱 | 封裝類型 | 設備類型 | 建議情境 |
+|----------|----------|----------|----------|
+| `gpt-4o-mini` | OpenAI | 線上 API | 預設推薦，用於高品質評分 |
+| `gemini-1.0` | Gemini | 線上 API | 對比測試或多語言評分 |
+| `breeze` | Breeze | 本地 GPU | 成本敏感或無網路情境 |
+| `llama` | Llama | 本地 GPU | 本地推理與離線評分 |
+| `groq` | Groq | 雲端硬體 | 低延遲商用硬體 |
+
+## 結果格式說明
+
+`scorer.py` 產生的評分結果通常包含以下欄位：
+
+| 欄位 | 說明 |
 |------|------|
-| 🚀 | 程式開始/進度 |
-| ✅ | 成功 |
-| ❌ | 失敗/錯誤 |
-| ⚠️ | 警告 |
-| 📊 | 統計資訊 |
-| 📉 | 詳細分析 |
-| 💾 | 檔案儲存 |
+| `text` | 待評分的原始句子 |
+| `score` | 基準分數或目標分數 |
+| `predicted_score` | 模型輸出的分數 |
+| `model_name` | 使用的模型名稱 |
+| `prompt_type` | prompt 版本或類型 |
 
-## 技術細節
+### CSV 輸入格式
 
-### 評分邏輯
-1. 載入 `dataset1.jsonl` 資料
-2. 執行 80-20 分層抽樣（Few-Shot 範例 vs 測試集）
-3. 為每句文本呼叫 OpenAI API (gpt-4o-mini)
-4. 使用 Regex 解析回應中的分數
-5. 計算精準度、Recall、F1 分數
-6. 生成混淆矩陣
+若使用 `--csv` 參數，輸入檔案需包含：
+- `text`
+- `output`
+- `target`
 
-### Retry 機制
-- 最多重試 5 次
-- 指數退避：2s → 4s → 8s → 16s → 32s
-- 處理速率限制 (429 error) 和額度不足
+程式會把 `output` 當作待評分文本，並將 `target` 轉換為 `score` 進行比對。
 
-## 修改記錄
+## 重要注意事項
 
-| 版本 | 日期 | 變更 |
-|------|------|------|
-| 1.0 | 2024-XX-XX | 初始版本，整合三個 prompt 版本 |
+- `results/` 目錄僅限本地輸出使用，不包含在 GitHub 上傳內容中。
+- 若要重現分數實驗，請先安裝相依套件並設定 `.env`。
+- 目前實驗流程固定使用 `V1_SCALE_DEFINITION`，避免版本差異導致結果不一致。
+
+## 參考命令
+
+```bash
+cd scorer
+python scorer.py -v 1 -m gpt-4o-mini -d dataset_scorer.jsonl
+python scorer.py -v 1 -m gemini-1.0 -d dataset_scorer.jsonl
+python scorer.py -v 1 -m breeze -d dataset_scorer.jsonl
+```
+
+## 版本摘要
+
+| 版本 | 說明 |
+|------|------|
+| `V1_SCALE_DEFINITION` | 固定使用版本，最基本的 1-4 級定義 |
+| `V2_SCALE_DEFINITION` | 排他性邊界版本，強調軟化詞語 |
+| `V3_SCALE_DEFINITION` | 改進版本，加入警告條款 |
+| `V4_SCALE_DEFINITION` | 重新定義 1/2 邊界 |
 
 ---
 
-**最後更新**: 2026-03-10
+**最後更新**: 2026-04-10
