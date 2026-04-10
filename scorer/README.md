@@ -110,8 +110,9 @@ python scorer.py --csv /path/to/file.csv
 
 以下數據來自 `scorer/results` 目錄中的已保存 CSV 檔案，均使用 `V1_SCALE_DEFINITION`。
 
+
 | 模型 / 配置 | 測試筆數 | 準確率 |
-|-------------|----------|--------|--------|
+| :--- | :---: | :---: |
 | `gpt-4o-mini` | 91 | 93.41% |
 | `llama-3.1-8B-Instruct` zero-shot | 567 | 43.56% |
 | `llama-3.1-8B-Instruct` 4-shot | 567 | 29.98% |
@@ -121,6 +122,7 @@ python scorer.py --csv /path/to/file.csv
 | `llama-Breeze2-8B-Instruct` 4-shot | 567 | 30.86% |
 | `llama-Breeze2-8B-Instruct` 8-shot | 567 | 34.92% |
 | `llama-Breeze2-8B-Instruct` 12-shot | 567 | 36.16% |
+
 
 
 ## 結果格式說明
