@@ -106,6 +106,23 @@ python scorer.py --csv /path/to/file.csv
 | `llama` | Llama | 本地 GPU | 本地推理與離線評分 |
 | `groq` | Groq | 雲端硬體 | 低延遲商用硬體 |
 
+## 現有實驗結果比較
+
+以下數據來自 `scorer/results` 目錄中的已保存 CSV 檔案，均使用 `V1_SCALE_DEFINITION`。
+
+| 模型 / 配置 | 結果檔案 | 測試筆數 | 準確率 |
+|-------------|----------|--------|--------|
+| `gpt-4o-mini` | `gpt-4o-mini/v1_scored_1774266926.csv` | 91 | 93.41% |
+| `llama-3.1-8B-Instruct` zero-shot | `results_Llama-3.1-8B-Instruct_zero-shot/...` | 567 | 43.56% |
+| `llama-3.1-8B-Instruct` 4-shot | `results_Llama-3.1-8B-Instruct_4-shot/...` | 567 | 29.98% |
+| `llama-3.1-8B-Instruct` 8-shot | `results_Llama-3.1-8B-Instruct_8-shot/...` | 567 | 27.51% |
+| `llama-3.1-8B-Instruct` 12-shot | `results_Llama-3.1-8B-Instruct_12-shot/...` | 567 | 26.63% |
+| `llama-Breeze2-8B-Instruct` zero-shot | `results_Llama-Breeze2-8B-Instruct_zero-shot/...` | 567 | 25.40% |
+| `llama-Breeze2-8B-Instruct` 4-shot | `results_Llama-Breeze2-8B-Instruct_4-shot/...` | 567 | 30.86% |
+| `llama-Breeze2-8B-Instruct` 8-shot | `results_Llama-Breeze2-8B-Instruct_8-shot/...` | 567 | 34.92% |
+| `llama-Breeze2-8B-Instruct` 12-shot | `results_Llama-Breeze2-8B-Instruct_12-shot/...` | 567 | 36.16% |
+
+
 ## 結果格式說明
 
 `scorer.py` 產生的評分結果通常包含以下欄位：
