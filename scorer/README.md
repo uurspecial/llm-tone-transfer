@@ -1,4 +1,4 @@
-# 語氣評分程式 (Tone Scoring Program)
+# scorer 在不同prompt和模型的表現
 
 統一管理三個版本的 prompt，支持透過命令行參數選擇評分版本。
 
