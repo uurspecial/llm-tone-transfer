@@ -1,7 +1,12 @@
 # Dataset 說明
 
-## 1. 三個檔案的用途
+## 1. 4個檔案的用途
 
+### dataset.jsonl
+* 內容格式：每行 `{"text": "...", "score": "1"}`
+* 範例：`{"text": "這個進度很理想，可以提早休息。", "score": "1"}`
+* 作用：原始資料集。接下來等比例切分成dataset_scorer.jsonl和dataset_test.jsonl
+  
 ### dataset_scorer.jsonl
 * 內容格式：每行 `{"text": "...", "score": "1"}`
 * 範例：`{"text": "這個進度很理想，可以提早休息。", "score": "1"}`
