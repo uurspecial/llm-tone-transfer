@@ -9,7 +9,7 @@
 
 ## 目錄結構
 
-\`\`\`text
+```text
 llm-tone-transfer/
 ├── src/                     # 原始程式碼與資料處理
 │   └── data/                # 測試資料與 JSONL 資料集
@@ -30,7 +30,7 @@ llm-tone-transfer/
 ├── .env                     # 環境變數設定（自行設定）
 ├── requirements.txt        # 專案依賴套件清單
 └── README.md                # 專案說明文件
-\`\`\`
+```
 
 ## 重要檔案說明
 
@@ -41,18 +41,18 @@ llm-tone-transfer/
 
 1. 先安裝依賴：
 
-\`\`\`bash
+```bash
 pip install -r requirements.txt
-\`\`\`
+```
 
 2. 建立 `.env` 檔，並填入必要的 API key，例如：
 
-\`\`\`text
+```text
 GOOGLE_API_KEY=你的_google_api_key
 HUGGINGFACE_TOKEN=你的_huggingface_token
 GROQ_API_KEY=你的_qroq_api_key
 OPENAI_API_KEY=你的_openai_api_key
-\`\`\`
+```
 
 
 
