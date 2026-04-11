@@ -32,7 +32,8 @@ llm-tone-transfer/
 └── README.md                # 專案說明文件
 ```
 
-## 重要檔案說明
+
+## 評分流程說明
 
 - `generator/`：生成模組，負責語氣轉換與句子生成流程。詳細內容請參考 [`generator/README.md`](generator/README.md)。
 - `scorer/`：評分模組，負責語氣等級判分與模型封裝。詳細內容請參考 [`scorer/README.md`](scorer/README.md)。
@@ -54,8 +55,10 @@ GROQ_API_KEY=你的_qroq_api_key
 OPENAI_API_KEY=你的_openai_api_key
 ```
 
-
-
 ## generator結果比較
 
-可參考 [`generator/README.md`](generator/README.md) 中 `Llama-3.1-8B-Instruct` 與 `Llama-Breeze2-8B-Instruct` 系列預測準確率比較表。
+
+| 系列 | zero-shot | 4-shot | 8-shot | 12-shot |
+|---|---|---|---|---|
+| `Llama-3.1-8B-Instruct` | 43.56% | 29.98% | 27.51% | 26.63% |
+| `Llama-Breeze2-8B-Instruct` | 25.40% | 30.86% | 34.92% | 36.16% |
