@@ -33,7 +33,7 @@ llm-tone-transfer/
 ```
 
 ## 等級定義
-| 等級 | 名稱 | 英文定義 | 核心特徵與描述 | 範例關鍵字/風格 |
+| 等級 | 名稱 | 英文名稱 | 定義 | 關鍵字/範例 |
 | :--- | :--- | :--- | :--- | :--- |
 | **1** | **溫和** | Polite / Warm | 語氣柔軟，以維護關係或展現禮貌為目的。 | 謝謝、麻煩你、喔、吧、不好意思 |
 | **2** | **中性** | Neutral / Factual | 如機器人或新聞報導般陳述事實，不帶個人情緒。 | 僅傳遞資訊，無語助詞 |
@@ -41,21 +41,21 @@ llm-tone-transfer/
 | **4** | **酸** | Sarcastic | 陰陽怪氣、高級反諷。用誇獎形式貶低，帶有幽默感。 | 你的智商真是人類奇蹟、挖苦 |
 
 ## 資料集
-| 檔案名稱 | 核心格式 | 關鍵欄位 | 主要用途 | 作用說明 |
-| :--- | :--- | :--- | :--- | :--- |
-| **dataset.jsonl** | `{"text", "score"}` | `score: 1-4` | **原始總庫** | 所有資料的來源，用於等比例切分出其他子集。 |
-| **dataset_scorer.jsonl** | `{"text", "score"}` | `score: 1-4` | **評分範例** | 提供給判分模型（Scorer）作為 Few-shot 範例，定義各等級語氣基準。 |
-| **dataset_test.jsonl** | `{"text", "score"}` | `score: 1-4` | **原始測試基底** | 紀錄測試句的「原始語氣」，作為改寫任務的來源輸入。 |
-| **dataset_test_generator.jsonl** | `{"text", "target"}` | `target: 1-4` | **生成任務指令** | 由 `dataset_test.jsonl` 擴展而來，指定原句需改寫成的目標語氣。 |
+| 檔案名稱 | 格式 | 筆數 | 說明 |
+| :--- | :--- | :--- | :--- |
+| **dataset.jsonl** | `{"text", "score"}` | 641 | 完整資料集 |
+| **dataset_scorer.jsonl** | `{"text", "score"}` | 452 |  提供給Scorer作為 Few-shot 範例 |
+| **dataset_test.jsonl** | `{"text", "score"}` | 189 |  紀錄測試句的「原始語氣」，作為改寫任務的來源輸入。 |
+| **dataset_test_generator.jsonl** | `{"text", "target"}` | 567 | 由 `dataset_test.jsonl` 擴展而來，指定原句需改寫成的目標語氣。 |
 ### 資料切分說明
 ```text
-[dataset.jsonl] ───┬───> [dataset_scorer.jsonl] (提供評分標準範例)
-                   └───> [dataset_test.jsonl]   (作為測試原句與 Ground Truth)
+[dataset.jsonl](641筆) ───┬───> [dataset_scorer.jsonl] (452筆)
+                   └───> [dataset_test.jsonl]   (189筆)
 ```
 
 ### 資料集範例  
 
-| 等級 (Score) | 語氣分類 | 範例語句 | 語義解析 |
+| 等級 (Score) | 名稱 | 範例 | 說明 |
 | :---: | :--- | :--- | :--- |
 | **1** | **溫和 (Warm)** | 請多指教，很高興認識你。 | 展現高度禮貌與親和力，意在建立正向連結。 |
 | **2** | **中性 (Neutral)** | 我們還是照原本的計畫進行吧。 | 純粹的事實陳述與決策告知，不帶任何情緒色彩。 |
