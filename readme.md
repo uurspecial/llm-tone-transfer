@@ -63,7 +63,7 @@ llm-tone-transfer/
 | **4** | **酸 (Sarcastic)** | 我小時候被狗咬過，所以現在看你有點害怕。 | **高級反諷**：透過誇飾比喻將對方比作狗，語帶幽默卻極具貶低意涵。 |
 
 ## 模型介紹
-- `scorer`：語氣裁判系統 負責評分 高準確率。
+- `scorer`：語氣裁判系統。負責評分，高準確率。
 詳細內容請參考 [`scorer/README.md`](scorer/README.md)。
 - `generator`：負責生成改寫句子和變更語氣。詳細內容請參考 [`generator/README.md`](generator/README.md)。
 
@@ -84,9 +84,16 @@ HUGGINGFACE_TOKEN=你的_huggingface_token
 GROQ_API_KEY=你的_qroq_api_key
 OPENAI_API_KEY=你的_openai_api_key
 ```
+## 現有結果比較
+### scorer
 
-## generator結果比較
+| 模型名稱 | 準確率 (Accuracy) |
+| :--- | :---: |
+| **gpt-4o-mini** | **93.41%** |
+| Breeze-7B-Instruct-v1_0 | 50.00% |
+| Meta-Llama-3-8B-Instruct | 45.83% |
 
+### generator
 
 | 系列 | zero-shot | 4-shot | 8-shot | 12-shot |
 |---|---|---|---|---|

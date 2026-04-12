@@ -50,7 +50,6 @@ python scorer.py
 
 ```bash
 python scorer.py -m gpt-4o-mini
-python scorer.py -m gemini-1.0
 python scorer.py -m breeze
 python scorer.py -m llama
 ```
