@@ -95,8 +95,14 @@ OPENAI_API_KEY=你的_openai_api_key
 | Meta-Llama-3-8B-Instruct | 45.83% |
 
 ### generator
-
+老師的程式碼:
 | 系列 | zero-shot | 4-shot | 8-shot | 12-shot |
 |---|---|---|---|---|
 | `Llama-3.1-8B-Instruct` | 43.56% | 29.98% | 27.51% | 26.63% |
 | `Llama-Breeze2-8B-Instruct` | 25.40% | 30.86% | 34.92% | 36.16% |
+
+簡報上的（我不知道是哪個檔案的結果）:
+| 系列 | zero-shot | 4-shot | 8-shot | 12-shot |
+|---|---|---|---|---|
+| `Llama-3.1-8B-Instruct` | 58.77% | 29.98% | 29.95% | 28.07% |
+| `Llama-Breeze2-8B-Instruct` | 35.09% | 36.84% | 38.60% | 40.35% |
