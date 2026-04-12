@@ -51,8 +51,10 @@ llm-tone-transfer/
 ```text
 [dataset.jsonl] ───┬───> [dataset_scorer.jsonl] (提供評分標準範例)
                    └───> [dataset_test.jsonl]   (作為測試原句與 Ground Truth)
+```
 
 ### 資料集範例  
+
 | 等級 (Score) | 語氣分類 | 範例語句 | 語義解析 |
 | :---: | :--- | :--- | :--- |
 | **1** | **溫和 (Warm)** | 請多指教，很高興認識你。 | 展現高度禮貌與親和力，意在建立正向連結。 |
