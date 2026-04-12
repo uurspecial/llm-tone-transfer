@@ -96,15 +96,6 @@ python scorer.py --csv /path/to/file.csv
 - 最後詢問模型：
   > 請對下面句子進行分析與打分
 
-## 支援模型比較
-
-| 模型名稱 | 封裝類型 | 設備類型 | 建議情境 |
-|----------|----------|----------|----------|
-| `gpt-4o-mini` | OpenAI | 線上 API | 預設推薦，用於高品質評分 |
-| `gemini-1.0` | Gemini | 線上 API | 對比測試或多語言評分 |
-| `breeze` | Breeze | 本地 GPU | 成本敏感或無網路情境 |
-| `llama` | Llama | 本地 GPU | 本地推理與離線評分 |
-| `groq` | Groq | 雲端硬體 | 低延遲商用硬體 |
 
 ## 現有實驗結果比較
 
@@ -141,9 +132,7 @@ python scorer.py --csv /path/to/file.csv
 程式會把 `output` 當作待評分文本，並將 `target` 轉換為 `score` 進行比對。
 
 ## 重要注意事項
-
-- `results/` 目錄僅限本地輸出使用，不包含在 GitHub 上傳內容中。
-- 若要重現分數實驗，請先安裝相依套件並設定 `.env`。
+- 請先安裝相依套件並設定 `.env`。
 - 目前實驗流程固定使用 `V1_SCALE_DEFINITION`，避免版本差異導致結果不一致。
 
 ## 參考命令
@@ -151,7 +140,6 @@ python scorer.py --csv /path/to/file.csv
 ```bash
 cd scorer
 python scorer.py -v 1 -m gpt-4o-mini -d dataset_scorer.jsonl
-python scorer.py -v 1 -m gemini-1.0 -d dataset_scorer.jsonl
 python scorer.py -v 1 -m breeze -d dataset_scorer.jsonl
 ```
 
@@ -166,4 +154,4 @@ python scorer.py -v 1 -m breeze -d dataset_scorer.jsonl
 
 ---
 
-**最後更新**: 2026-04-10
+**最後更新**: 2026-04-12

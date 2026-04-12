@@ -3,7 +3,7 @@
 ## 檔案結構
 
 ```
-new/generator/
+generator/
 ├── main.py        # 主程式，負責讀資料、呼叫生成器和 scorer、寫出結果
 ├── generator.py   # 不同模型的生成器類別，負責依照 target_level 產生改寫句
 ├── change.py      # 同等級換句話說功能
@@ -72,7 +72,7 @@ new/generator/
 ## 測試步驟
 
 ```bash
-cd new/generator
+cd generator
 python main.py
 ```
 
@@ -108,7 +108,7 @@ Processing S002: 你一定要在這種時候潑冷水嗎？
 
 ## 生成結果比較（預測準確率）
 
-以下表格比較 `results_Llama-3.1-8B-Instruct` 系列與 `results_Llama-Breeze2-8B-Instruct` 系列的預測準確率，資料來源為對應 `*_config.txt` 中的 `預測準確度`：
+以下表格比較 `Llama-3.1-8B-Instruct` 系列與 `Llama-Breeze2-8B-Instruct` 系列的預測準確率：
 
 | 系列 | zero-shot | 4-shot | 8-shot | 12-shot |
 |---|---|---|---|---|
