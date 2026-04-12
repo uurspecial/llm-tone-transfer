@@ -40,10 +40,10 @@ generator/
 - 建立 prompt 的邏輯。
 - `BasicPromptBuilder1`：僅提供語氣等級定義與輸入句子，zero-shot。
 - `DataPromptBuilder1`：  
-4-shot：包含 4 個範例（每個語氣類別各 1 個）。  
-8-shot：包含 8 個範例（每個語氣類別各 2 個，為 4-shot 的超集）。  
-12-shot：包含 12 個範例（每個語氣類別各 3 個，為 8-shot 的超集）。  
-**目前每個等級只有 1 一句參考範例。**
+4-shot：包含 4 個範例（每個等級各 1 個）。  
+8-shot：包含 8 個範例（每個等級各 2 個）。  
+12-shot：包含 12 個範例（每個等級各 3 個）。  
+<font color="red">**目前每個等級只有 1 個範例。**</font>
 
 ### `utils.py`
 - 環境設定與共用工具。
