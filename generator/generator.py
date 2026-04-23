@@ -4,7 +4,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from google import genai
 from google.genai import types
 import os
-import prompts
+from . import prompts
 import time
 from google.api_core import exceptions
 from google.genai import types
