@@ -15,7 +15,7 @@ scorer = Scorer(dataset_path="src/data/dataset_scorer.jsonl")
 print("✅ 系統載入完成！")
 
 # 核心邏輯
-def process_tone(input_text, target_level, use_rag):
+def process_tone(input_text, target_level):
     if not input_text.strip():
         return "請輸入文字！", ""
     
@@ -25,7 +25,6 @@ def process_tone(input_text, target_level, use_rag):
     output_text = generator.generate(
         text=input_text,
         level=level_int,
-        use_data=use_rag
     )
     
     # 呼叫 scorer.score()
@@ -48,7 +47,6 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
                 value="4-酸",
                 label="🎯 選擇目標語氣"
             )
-            use_rag = gr.Checkbox(label="📚 啟用 RAG", value=True)
             submit_btn = gr.Button("🚀 開始轉換", variant="primary")
         
         with gr.Column(scale=1):
@@ -57,7 +55,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
     
     submit_btn.click(
         fn=process_tone,
-        inputs=[input_text, target_level, use_rag],
+        inputs=[input_text, target_level],
         outputs=[output_text, eval_result]
     )
 
