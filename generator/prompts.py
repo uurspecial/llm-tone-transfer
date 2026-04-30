@@ -81,10 +81,16 @@ Level {target_level} 改寫："""
 
 class DataPromptBuilder1:
     """
-    自訂 4 句 Few-shot 範例的 Prompt Builder
+    從 dataset_test.jsonl 動態載入每個等級前30句作為 Few-shot 範例的 Prompt Builder
     """
-    # 這裡保留 json_path 和 sample_size 參數，是為了讓你 main.py 不用改程式碼也不會報錯
-    def __init__(self, json_path=None, sample_size=None):
+    def __init__(self, json_path=None, sample_size=30):
+        """
+        初始化 Prompt Builder，從指定的 JSONL 檔案載入範例
+        
+        參數：
+            json_path: JSONL 檔案路徑。如果為 None，預設使用 src/data/dataset_test.jsonl
+            sample_size: 每個等級要載入的句子數量，預設 30
+        """
         self.level_defs = {
             1: "【Level 1：溫和】(重點在對方感受，語氣柔和)",
             2: "【Level 2：中性】(陳述事實，冷靜直接)",
@@ -93,34 +99,46 @@ class DataPromptBuilder1:
         }
         self.levels = [1, 2, 3, 4]
         
-        # 🔻 在這裡填入想要指定的每一級 x 句 few-shot 範例 🔻
-        self.custom_examples = {
-            1: [
-                "請多指教，很高興認識你。",
-                "真是不好意思讓你跑一趟。",
-                "不用急，慢慢來就好，安全重要。",
-                "沒關係的，大家都有不方便的時候。"
-            ],
-            2: [
-                "我晚一點才會回到家。",
-                "冰箱裡的牛奶好像已經喝完了。",
-                "明天早上我有事情要早點出門。",
-                "那就照原本討論的做法進行就可以。",
-            ],
-            3: [
-                "這種爛攤子你自己想辦法收拾。",
-                "拜託快閉嘴，聽你講話都覺得頭痛。",
-                "做不好就承認，不要一直找藉口啦。",
-                "你真的很吵，能不能趕快給我閉嘴。",
-
-            ],
-            4: [
-                "對不起 我不跟一坨跳動的肉說話",
-                "上帝把智慧灑滿了人間，唯獨為你撐了傘",
-                "你不是笨，你只是把天賦全部拿去呼吸了",
-                "跟你聊天很有趣，因為你的每句話都在提醒我知識的重要",
-            ]
-        }
+        # 從 dataset_test.jsonl 動態載入 few-shot 範例
+        self.custom_examples = self._load_examples_from_dataset(json_path, sample_size)
+    
+    def _load_examples_from_dataset(self, json_path=None, sample_size=30):
+        """
+        從 JSONL 檔案中動態載入每個等級的範例
+        """
+        # 若未指定路徑，使用預設路徑 (相對於 generator 目錄的上一級)
+        if json_path is None:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            parent_dir = os.path.dirname(current_dir)
+            json_path = os.path.join(parent_dir, "src", "data", "dataset_test.jsonl")
+        else:
+            # 如果指定了路徑，優先嘗試相對於 generator 目錄的上一級
+            if not os.path.isabs(json_path):
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                parent_dir = os.path.dirname(current_dir)
+                potential_path = os.path.join(parent_dir, json_path)
+                if os.path.exists(potential_path):
+                    json_path = potential_path
+        
+        examples = {1: [], 2: [], 3: [], 4: []}
+        
+        if os.path.exists(json_path):
+            try:
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        if line.strip():
+                            data = json.loads(line)
+                            score = int(data.get("score", 0))
+                            if score in examples:
+                                # 只保留每個等級前 sample_size 筆
+                                if len(examples[score]) < sample_size:
+                                    examples[score].append(data.get("text", ""))
+            except Exception as e:
+                print(f"⚠️ 警告：無法載入 {json_path}：{e}")
+        else:
+            print(f"⚠️ 警告：找不到檔案 {json_path}")
+        
+        return examples
 
     def build_prompt(self, original_text: str, target_level: int, original_level: int = None) -> str:
         """
