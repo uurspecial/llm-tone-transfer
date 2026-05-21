@@ -196,7 +196,6 @@ def main():
     print(f"\n{'='*50}")
     print(f"🚀 開始評分程式")
     print(f"使用版本: {args.version}")
-    print(f"版本描述: {AVAILABLE_VERSIONS[args.version]}")
     print(f"模型: {args.model}")
     if args.csv:
         print(f"CSV 檔案: {args.csv}")
@@ -211,6 +210,16 @@ def main():
     if args.csv:
         # 讀取 CSV
         df_test = pd.read_csv(args.csv, encoding="utf-8")
+       
+
+
+        # === 修改點：映射欄位名稱 ===
+        # 檢查並建立 scorer.py 需要的 'output' 和 'target' 欄位
+        if 'generated_text' in df_test.columns:
+            df_test['output'] = df_test['generated_text']
+        if 'target_level' in df_test.columns:
+            df_test['target'] = df_test['target_level']
+
         if 'output' not in df_test.columns or 'target' not in df_test.columns:
             print("❌ CSV 必須包含 'output' 和 'target' 欄位")
             return

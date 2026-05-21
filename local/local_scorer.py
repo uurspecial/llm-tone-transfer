@@ -1,29 +1,35 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 import json
-import re #regular expression,Regex
+import re
 import torch
 from tqdm import tqdm
 import os
 
-device = torch.device("mps")
-model_name="google/gemma-4-31B-it"
-model=AutoModelForCausalLM.from_pretrained(model_name,trust_remote_code=True).to(device)#系統自動把模型分配到可用的GPU上
-tokenizer=AutoTokenizer.from_pretrained(model_name,trust_remote_code=True)
+# ==========================================
+# 1. 硬體與量化設定
+# ==========================================
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def build_few_shot_prompt(dataset):
-    formatted_examples = "【評分範例】\n"
-    
-    for item in dataset:
-        # 這裡需要把每一個 item (字典) 轉換成文字
-        formatted_examples += f"原句：{item['original']}\n"
-        formatted_examples += f"1分：{item[1]}\n"
-        formatted_examples += f"2分：{item[2]}\n"
-        formatted_examples += f"3分：{item[3]}\n"
-        formatted_examples += f"4分：{item[4]}\n\n"
-    return formatted_examples
+# 啟動 4-bit 量化魔法
+quantization_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.float16
+)
+
+model_name = "google/gemma-4-31B-it"
+print(f"📦 正在載入 {model_name} (啟用 4-bit 量化)...")
+
+# 載入模型 (加入 device_map="auto" 讓系統自己管記憶體，並套用量化)
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    trust_remote_code=True,
+    device_map="auto",  
+    quantization_config=quantization_config 
+)
+tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+
 
 def create_final_prompt(new_sentence):
-    # 用強烈的指令語氣，並加上明確的警告
     prompt = f"""User:你是一個語氣評分機器。你的唯一任務是閱讀最後的「目標句子」，並判斷它的語氣分數。
     警告：你「只能」輸出一個純數字（1、2、3 或 4），絕對不可以輸出任何解釋、標籤，也不准造句！
 
@@ -32,7 +38,6 @@ def create_final_prompt(new_sentence):
     2-中性（Neutral / Factual）：像機器人或新聞報導一樣陳述事實。不帶個人情緒，沒有明顯的語助詞，僅傳遞資訊。
     3-不滿（Direct Anger / Complaint）：情緒直接外露。直接表達憤怒、指責、命令或抱怨。特徵是「直球對決」，不拐彎抹角，沒有幽默感。（例如：閉嘴、你很煩、爛透了）。
     4-酸（Sarcastic / Mocking）：陰陽怪氣、高級反諷。使用「誇獎的形式來貶低」或「誇飾的比喻」。特徵是帶有幽默感、嘲諷、挖苦，比直接罵更刺耳。（例如：你的智商真是人類奇蹟）。
-
 
     【評分範例】
     目標句子：我注意到你最近氣色變好了。
@@ -51,31 +56,28 @@ def create_final_prompt(new_sentence):
     目標句子：{new_sentence}
     分數：
     Assistant: """
-
-        
     return prompt
 
 def score_sentence(new_sentence):
-    prompt=create_final_prompt(new_sentence)
-    text_input=tokenizer(prompt,return_tensors="pt").to(device)# PyTorch
+    prompt = create_final_prompt(new_sentence)
+    text_input = tokenizer(prompt, return_tensors="pt").to(device)
 
-    #模型推論
-    generated_ids=model.generate(**text_input, 
-                                 max_new_tokens=8,
-                                 do_sample=False,
-                                 repetition_penalty=1.2) #generated_ids是Tokens
+    generated_ids = model.generate(
+        **text_input, 
+        max_new_tokens=8,
+        do_sample=False,
+        repetition_penalty=1.2
+    ) 
     
-    # 計算原本輸入的長度
     input_length = text_input['input_ids'].shape[1]
-
-    # 只拿出輸入長度之後的新代碼來解碼
     response_text = tokenizer.decode(generated_ids[0][input_length:], skip_special_tokens=True)
     
     return response_text
 
-
-
-print("🚀 開始進行全面測試（目標 641 筆），使用 MPS 加速推論中...")
+# ==========================================
+# 3. 執行測試迴圈
+# ==========================================
+print("\n🚀 開始進行全面測試（目標 641 筆），使用 CUDA 加速推論中...")
 
 correct_count = 0
 total_count = 0
@@ -83,7 +85,9 @@ total_count = 0
 labels = ['1', '2', '3', '4', '解析失敗']
 confusion_matrix = {true_score: {pred_score: 0 for pred_score in labels} for true_score in ['1', '2', '3', '4']}
 
-# 開啟原始資料集 (讀取)，以及準備寫入的 local/dataset_results.jsonl
+# 確保 local 資料夾存在
+os.makedirs('local', exist_ok=True)
+
 with open('src/data/dataset.jsonl', 'r', encoding='utf-8') as f, \
      open('local/dataset_results4.jsonl', 'w', encoding='utf-8') as out_jsonl:
     
@@ -94,18 +98,14 @@ with open('src/data/dataset.jsonl', 'r', encoding='utf-8') as f, \
         target_text = data['text']
         ground_truth = str(data['score']) 
         
-        # 呼叫模型
         raw_model_output = score_sentence(target_text)
         
-        # 萃取數字
         match = re.search(r'[1-4]', raw_model_output)
         clean_score = match.group(0) if match else "解析失敗"
         
-        # 記錄到混淆矩陣中
         if ground_truth in confusion_matrix:
             confusion_matrix[ground_truth][clean_score] += 1
         
-        # 判斷對錯
         is_correct = (clean_score == ground_truth)
         if is_correct:
             correct_count += 1
@@ -118,14 +118,14 @@ with open('src/data/dataset.jsonl', 'r', encoding='utf-8') as f, \
             "最新結果": f"{'✅' if is_correct else '❌'}"
         })
         
-        # 💾 即時將包含預測結果的整筆資料，寫入 local 資料夾內的 JSONL
         data['model_score'] = clean_score
         data['is_correct'] = is_correct
         out_jsonl.write(json.dumps(data, ensure_ascii=False) + '\n')
-        out_jsonl.flush() # 確保即時寫入硬碟，防止當機遺失
+        out_jsonl.flush()
 
-
-# ===== 測試跑完後，結算成績並輸出到 local/output.txt =====
+# ==========================================
+# 4. 結算成績與報告
+# ==========================================
 if total_count > 0:
     accuracy = (correct_count / total_count) * 100
     
@@ -149,7 +149,6 @@ if total_count > 0:
     
     print(report)
     
-    #  這裡的文字報告路徑也改成了 'local/output.txt'
     with open('local/output4.txt', 'w', encoding='utf-8') as out_txt:
         out_txt.write(report)
         
