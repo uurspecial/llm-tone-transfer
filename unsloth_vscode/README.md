@@ -196,3 +196,64 @@ python unsloth_vscode/test_classifier.py \
 - 5-fold 統整：`classifier_cv_summary.json`
 - 測試明細：`classifier_test_results.csv`
 - 測試指標：`classifier_metrics.json`
+
+## 6) 用 scorer 評估「其他模型」輸出
+
+你可以把任何模型（例如 GPT、Gemini、Claude 或你自己的生成模型）的輸出句子，交給這個 scorer 打分。
+
+### 步驟 1：準備 scorer 輸入檔
+
+建立一個 `jsonl`，每行一筆。最簡單格式：
+
+```json
+{"id": 1, "text": "你早餐吃過了嗎?", "label": 2}
+{"id": 2, "text": "哇你這進度真的穩到不行。", "label": 4}
+```
+
+說明：
+
+- `text`：其他模型產生的句子（scorer 會判斷它屬於哪一類語氣）
+- `label`：這筆資料「目標語氣」(1~4)，用來計算正確率與 F1
+
+如果你的欄位不是 `text/label`，也可用相容欄位：
+
+- 文字：`sentence` / `input`
+- 標籤：`score` / `labels` / `output`
+
+### 步驟 2：用 scorer 模型評估
+
+```bash
+python unsloth_vscode/test_classifier.py \
+  --test-file unsloth_vscode/data/other_model_outputs.jsonl \
+  --lora-dir unsloth_vscode/classifier_lora_cv/fold_0 \
+  --results-file unsloth_vscode/results_other_model.csv \
+  --report-file unsloth_vscode/metrics_other_model.json
+```
+
+輸出結果：
+
+- `results_other_model.csv`：逐筆結果（`gold_label_id` / `pred_label_id` / `is_correct`）
+- `metrics_other_model.json`：整體指標（accuracy、macro-F1、confusion matrix）
+
+### 步驟 3：比較多個模型
+
+把每個模型輸出整理成各自的 jsonl，分別跑一次：
+
+```bash
+python unsloth_vscode/test_classifier.py \
+  --test-file unsloth_vscode/data/gpt_outputs.jsonl \
+  --lora-dir unsloth_vscode/classifier_lora_cv/fold_0 \
+  --report-file unsloth_vscode/metrics_gpt.json
+
+python unsloth_vscode/test_classifier.py \
+  --test-file unsloth_vscode/data/other_llm_outputs.jsonl \
+  --lora-dir unsloth_vscode/classifier_lora_cv/fold_0 \
+  --report-file unsloth_vscode/metrics_other_llm.json
+```
+
+最後比較兩份 JSON 的 `accuracy` 與 `macro_f1` 即可。
+
+### 注意
+
+- scorer 本身是分類模型，最適合做「語氣類別一致性」評估，不等於人工主觀品質評分。
+- 你目前的 scorer 是 LoRA adapter，評估時需同時可存取 base model（預設 `unsloth/Meta-Llama-3.1-8B`）。
