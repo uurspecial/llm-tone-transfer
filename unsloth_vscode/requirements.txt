@@ -1,0 +1,14 @@
+unsloth
+torch
+transformers
+peft
+accelerate
+bitsandbytes
+datasets>=3.4.1
+trl>=0.15.2
+scikit-learn
+pandas
+numpy
+sentencepiece
+protobuf
+safetensors
